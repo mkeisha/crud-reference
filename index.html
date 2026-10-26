@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory Restock System</title>
+
+    <style>
+    input {
+        width: 200px;
+        padding: 10px;
+        font-size: 16px;
+    }
+
+    button {
+        padding: 10px 15px;
+        font-size: 16px;
+    }
+
+    #result {
+    font-size: 18px;
+    line-height: 1.6;
+}
+    
+</style>
+</head>
+<body>
+
+    <h1>Inventory Restock System</h1>
+
+    <!-- Add product -->
+    <h2>Add Product</h2>
+    <input type="text" id="name" placeholder="Product Name">
+    <input type="text" id="category" placeholder="Category">
+    <input type="number" id="price" placeholder="Price">
+    <input type="number" id="stock" placeholder="Stock">
+    <button onclick="addProduct()">Add</button>
+
+    <!-- Search by ID -->
+    <h2>Search Product</h2>
+    <input type="number" id="searchId" placeholder="Enter ID">
+    <button onclick="searchProduct()">Search</button>
+    <p id="result"></p>
+
+    <!-- View all -->
+    <h2>All Products</h2>
+    <button onclick="loadProducts()">View All</button>
+
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>ID</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+    <script>
+        // View all records
+        function loadProducts() {
+            fetch("/api/products")
+                .then(response => response.json())
+                .then(products => {
+                    const tableBody = document.getElementById("tableBody");
+                    tableBody.innerHTML = "";
+
+                    products.forEach(product => {
+                        tableBody.innerHTML += `
+                            <tr>
+                                <td>${product.id}</td>
+                                <td>${product.product_name}</td>
+                                <td>${product.category}</td>
+                                <td>${product.price}</td>
+                                <td>${product.stock}</td>
+                                <td>${product.status}</td>
+                                <td><button onclick="deleteProduct(${product.id})">Delete</button></td>
+                            </tr>
+                        `;
+                    });
+                });
+        }
+
+        // Search one record by ID
+        function searchProduct() {
+            const id = document.getElementById("searchId").value;
+
+            fetch("/api/products/" + id)
+                .then(response => response.json())
+                .then(product => {
+                    if (product.message) {
+                        document.getElementById("result").innerText = product.message;
+                    } else {
+                        document.getElementById("result").innerHTML =
+                            "ID: " + product.id + "<br>" +
+                            "Product Name: " + product.product_name + "<br>" +
+                            "Category: " + product.category + "<br>" +
+                            "Price: " + product.price + "<br>" +
+                            "Stock: " + product.stock + "<br>" +
+                            "Status: " + product.status;
+                    }
+                });
+        }
+
+        // Add a new record
+        function addProduct() {
+            const newProduct = {
+                product_name: document.getElementById("name").value,
+                category: document.getElementById("category").value,
+                price: document.getElementById("price").value,
+                stock: document.getElementById("stock").value
+            };
+
+            fetch("/api/products", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newProduct)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message);
+                    } else {
+                        alert("Product added");
+                        loadProducts();
+                    }
+                });
+        }
+
+        // Delete a record
+        function deleteProduct(id) {
+            fetch("/api/products/" + id, { method: "DELETE" })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    loadProducts();
+                });
+        }
+    </script>
+
+</body>
+</html>
