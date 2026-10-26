@@ -20,7 +20,7 @@ find (one match), findIndex (position), push (add), splice(index, 1) (remove)
 
 git init
 git add .
-git commit -m "Inventory CRUD reference"
+git commit -m "CRUD reference"
 git branch -M main
 git remote add origin https://github.com/YOUR-USERNAME/crud-reference.git
 git push -u origin main
